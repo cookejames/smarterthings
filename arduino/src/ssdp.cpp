@@ -15,7 +15,7 @@ Ssdp::Ssdp(ESP8266WebServer *httpInstance) {
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
   SSDP.setSerialNumber(ESP.getChipId());
-  SSDP.setDeviceType("urn:schemas-upnp-org:device:SmartLed:1");
+  SSDP.setDeviceType("urn:schemas-upnp-org:device:SmarterThings:1");
   SSDP.setName(NAME);
   SSDP.setModelName(MODEL_NAME);
   SSDP.setModelNumber(MODEL_NUMBER);

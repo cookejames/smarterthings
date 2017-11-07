@@ -18,7 +18,7 @@ import groovy.json.JsonSlurper
 
 // for the UI
 metadata {
-	definition (name: "SmartLed", namespace: "cookejames", author: "James Cooke - based on work by Allan (vseven)") {
+	definition (name: "SmarterLedStrip", namespace: "cookejames", author: "James Cooke - based on work by Allan (vseven)") {
 	capability "Switch"
 	capability "Switch Level"
 	capability "Actuator"
@@ -370,7 +370,7 @@ def installed() {
 def configure() {
     logging("configure()", 1)
     def cmds = []
-    cmds = update_needed_settings()
+    // cmds = update_needed_settings()
     if (cmds != []) cmds
 }
 
@@ -378,7 +378,7 @@ def updated()
 {
     logging("updated()", 1)
     def cmds = []
-    cmds = update_needed_settings()
+    // cmds = update_needed_settings()
     sendEvent(name: "checkInterval", value: 2 * 15 * 60 + 2 * 60, displayed: false, data: [protocol: "lan", hubHardwareId: device.hub.hardwareID])
     sendEvent(name:"needUpdate", value: device.currentValue("needUpdate"), displayed:false, isStateChange: true)
     if (cmds != []) response(cmds)

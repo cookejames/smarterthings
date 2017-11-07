@@ -1,7 +1,7 @@
 #ifndef wifi_h
 #define wifi_h
 #include <Arduino.h>
-#define DEFAULT_AP_NAME "SmartLed"
+#define DEFAULT_AP_NAME "SmarterThings"
 
 class Wifi
 {

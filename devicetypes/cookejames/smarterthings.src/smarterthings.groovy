@@ -17,14 +17,14 @@
  */
 
 definition(
-    name: "Led Linker",
+    name: "Smarter Things",
     namespace: "cookejames",
     author: "James Cooke - based on work by Eric Maycock (erocm123)",
     description: "Connection application for WS2812b strips",
     category: "Convenience",
-    iconUrl:   "https://raw.githubusercontent.com/erocm123/SmartThingsPublic/master/smartapps/erocm123/sonoff-connect.src/sonoff-connect-icon.png",
-    iconX2Url: "https://raw.githubusercontent.com/erocm123/SmartThingsPublic/master/smartapps/erocm123/sonoff-connect.src/sonoff-connect-icon-2x.png",
-    iconX3Url: "https://raw.githubusercontent.com/erocm123/SmartThingsPublic/master/smartapps/erocm123/sonoff-connect.src/sonoff-connect-icon-3x.png"
+    iconUrl:   "http://cdn.device-icons.smartthings.com/Home/home1-icn.png",
+    iconX2Url: "http://cdn.device-icons.smartthings.com/Home/home1-icn@2x.png",
+    iconX3Url: "http://cdn.device-icons.smartthings.com/Home/home1-icn@3x.png"
 )
 
 preferences {
@@ -80,7 +80,7 @@ def manuallyAdd(){
    dynamicPage(name: "manuallyAdd", title: "Manually add a led strip", nextPage: "manuallyAddConfirm") {
 		section {
 			paragraph "This process will manually create a device based on the entered IP address. The SmartApp needs to then communicate with the device to obtain additional information from it. Make sure the device is on and connected to your wifi network."
-            input "deviceType", "enum", title:"Device Type", description: "", required: false, options: ["SmartLed"]
+            input "deviceType", "enum", title:"Device Type", description: "", required: false, options: ["SmarterLedStrip"]
             input "ipAddress", "text", title:"IP Address", description: "", required: false
 		}
     }
@@ -89,8 +89,8 @@ def manuallyAdd(){
 def manuallyAddConfirm(){
    if ( ipAddress =~ /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/) {
        log.debug "Creating led strip with dni: ${convertIPtoHex(ipAddress)}:${convertPortToHex("80")}"
-       addChildDevice("cookejames", deviceType ? deviceType : "SmartLed", "${convertIPtoHex(ipAddress)}:${convertPortToHex("80")}", location.hubs[0].id, [
-           "label": (deviceType ? deviceType : "SmartLed") + " (${ipAddress})",
+       addChildDevice("cookejames", deviceType ? deviceType : "SmarterLedStrip", "${convertIPtoHex(ipAddress)}:${convertPortToHex("80")}", location.hubs[0].id, [
+           "label": (deviceType ? deviceType : "SmarterLedStrip") + " (${ipAddress})",
            "data": [
            "ip": ipAddress,
            "port": "80"
@@ -204,7 +204,7 @@ def getVerifiedDevices() {
 }
 
 private discoverDevices() {
-	sendHubCommand(new physicalgraph.device.HubAction("lan discovery urn:schemas-upnp-org:device:SmartLed:1", physicalgraph.device.Protocol.LAN))
+	sendHubCommand(new physicalgraph.device.HubAction("lan discovery urn:schemas-upnp-org:device:SmarterThings:1", physicalgraph.device.Protocol.LAN))
 }
 
 def configured() {
@@ -257,11 +257,11 @@ def initialize() {
 }
 
 void ssdpSubscribe() {
-    subscribe(location, "ssdpTerm.urn:schemas-upnp-org:device:SmartLed:1", ssdpHandler)
+    subscribe(location, "ssdpTerm.urn:schemas-upnp-org:device:SmarterThings:1", ssdpHandler)
 }
 
 void ssdpDiscover() {
-    sendHubCommand(new physicalgraph.device.HubAction("lan discovery urn:schemas-upnp-org:device:SmartLed:1", physicalgraph.device.Protocol.LAN))
+    sendHubCommand(new physicalgraph.device.HubAction("lan discovery urn:schemas-upnp-org:device:SmarterThings:1", physicalgraph.device.Protocol.LAN))
 }
 
 def ssdpHandler(evt) {
@@ -316,7 +316,7 @@ void deviceDescriptionHandler(physicalgraph.device.HubResponse hubResponse) {
 	log.trace "description.xml response (application/xml)"
 	def body = hubResponse.xml
     log.debug body?.device?.friendlyName?.text()
-	if (body?.device?.modelName?.text().startsWith("SmartLed")) {
+	if (body?.device?.modelName?.text().startsWith("SmarterThings")) {
 		def devices = getDevices()
 		def device = devices.find {it?.key?.contains(body?.device?.UDN?.text())}
 		if (device) {
@@ -345,10 +345,10 @@ def addDevices() {
             log.debug "Creating device with dni: ${selectedDevice.value.mac}"
 
             def deviceHandlerName
-            if (selectedDevice?.value?.name?.startsWith("Smart Led Controller"))
-                deviceHandlerName = "SmartLed"
+            if (selectedDevice?.value?.name?.startsWith("Smarter Things Led Strip"))
+                deviceHandlerName = "SmarterLedStrip"
             def newDevice = addChildDevice("cookejames", deviceHandlerName, selectedDevice.value.mac, selectedDevice?.value.hub, [
-                "label": selectedDevice?.value?.name ?: "SmartLed",
+                "label": selectedDevice?.value?.name ?: "SmarterLedStrip",
                 "data": [
                     "mac": selectedDevice.value.mac,
                     "ip": convertHexToIP(selectedDevice.value.networkAddress),
