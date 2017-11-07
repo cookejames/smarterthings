@@ -6,8 +6,6 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
-#define DEFAULT_AP_NAME "SmartLed"
-
 Wifi::Wifi() {}
 
 void Wifi::setup() {

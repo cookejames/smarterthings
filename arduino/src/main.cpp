@@ -2,11 +2,12 @@
 #include "leds.h"
 #include "wifi.h"
 #include "ssdp.h"
+#include "ota.h"
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ArduinoJson.h>
 
-#define NUM_LEDS 1
+#define NUM_LEDS 100
 Leds leds(NUM_LEDS);
 ESP8266WebServer server(80);
 Ssdp ssdp(&server);
@@ -82,9 +83,11 @@ void setupHandlers() {
 void setup() {
   Serial.begin(115200);
   Wifi::setup();
+  Ota::setup();
 
-  if (MDNS.begin(Wifi::getSsid().c_str())) {
-    Serial.println("MDNS responder started");
+  String hostname = Wifi::getSsid() + ".local";
+  if (MDNS.begin(hostname.c_str())) {
+    Serial.printf("MDNS responder started from %s\n", hostname.c_str());
   }
 
   setupHandlers();
@@ -93,4 +96,5 @@ void setup() {
 
 void loop() {
     server.handleClient();
+    Ota::loop();
 }

@@ -3,10 +3,6 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266SSDP.h>
 
-#define NAME "Smart Led Controller"
-#define MODEL_NAME "SmartLed"
-#define MODEL_NUMBER "smartledv1"
-
 Ssdp::Ssdp(ESP8266WebServer *httpInstance) {
   http = httpInstance;
 
