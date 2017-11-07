@@ -18,7 +18,7 @@ import groovy.json.JsonSlurper
 
 // for the UI
 metadata {
-	definition (name: "SmarterLedStrip", namespace: "cookejames", author: "James Cooke - based on work by Allan (vseven)") {
+	definition (name: "Smarter Led Strip", namespace: "cookejames", author: "James Cooke - based on work by Allan (vseven)") {
 	capability "Switch"
 	capability "Switch Level"
 	capability "Actuator"

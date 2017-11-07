@@ -80,7 +80,7 @@ def manuallyAdd(){
    dynamicPage(name: "manuallyAdd", title: "Manually add a led strip", nextPage: "manuallyAddConfirm") {
 		section {
 			paragraph "This process will manually create a device based on the entered IP address. The SmartApp needs to then communicate with the device to obtain additional information from it. Make sure the device is on and connected to your wifi network."
-            input "deviceType", "enum", title:"Device Type", description: "", required: false, options: ["SmarterLedStrip"]
+            input "deviceType", "enum", title:"Device Type", description: "", required: false, options: ["Smarter Led Strip"]
             input "ipAddress", "text", title:"IP Address", description: "", required: false
 		}
     }
@@ -89,8 +89,8 @@ def manuallyAdd(){
 def manuallyAddConfirm(){
    if ( ipAddress =~ /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/) {
        log.debug "Creating led strip with dni: ${convertIPtoHex(ipAddress)}:${convertPortToHex("80")}"
-       addChildDevice("cookejames", deviceType ? deviceType : "SmarterLedStrip", "${convertIPtoHex(ipAddress)}:${convertPortToHex("80")}", location.hubs[0].id, [
-           "label": (deviceType ? deviceType : "SmarterLedStrip") + " (${ipAddress})",
+       addChildDevice("cookejames", deviceType ? deviceType : "Smarter Led Strip", "${convertIPtoHex(ipAddress)}:${convertPortToHex("80")}", location.hubs[0].id, [
+           "label": (deviceType ? deviceType : "Smarter Led Strip") + " (${ipAddress})",
            "data": [
            "ip": ipAddress,
            "port": "80"
@@ -346,9 +346,9 @@ def addDevices() {
 
             def deviceHandlerName
             if (selectedDevice?.value?.name?.startsWith("Smarter Things Led Strip"))
-                deviceHandlerName = "SmarterLedStrip"
+                deviceHandlerName = "Smarter Led Strip"
             def newDevice = addChildDevice("cookejames", deviceHandlerName, selectedDevice.value.mac, selectedDevice?.value.hub, [
-                "label": selectedDevice?.value?.name ?: "SmarterLedStrip",
+                "label": selectedDevice?.value?.name ?: "Smarter Led Strip",
                 "data": [
                     "mac": selectedDevice.value.mac,
                     "ip": convertHexToIP(selectedDevice.value.networkAddress),
