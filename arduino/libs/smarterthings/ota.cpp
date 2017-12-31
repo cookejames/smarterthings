@@ -3,7 +3,7 @@
 
 Ota::Ota() {}
 
-void Ota::setup() {
+void Ota::begin() {
   String hostname = Wifi::getSsid() + ".local";
   ArduinoOTA.setHostname(hostname.c_str());
 

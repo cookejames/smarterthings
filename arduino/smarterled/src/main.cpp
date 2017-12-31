@@ -10,7 +10,7 @@
 #define NUM_LEDS 100
 Leds leds(NUM_LEDS);
 ESP8266WebServer server(80);
-Ssdp ssdp(&server);
+Ssdp ssdp(&server, "Smarter Things Led Strip", "SmarterThingsLedStrip", "stlsv1");
 
 void sendSuccess() {
   server.send(200);
@@ -82,8 +82,8 @@ void setupHandlers() {
 
 void setup() {
   Serial.begin(115200);
-  Wifi::setup();
-  Ota::setup();
+  Wifi::begin();
+  Ota::begin();
 
   String hostname = Wifi::getSsid() + ".local";
   if (MDNS.begin(hostname.c_str())) {

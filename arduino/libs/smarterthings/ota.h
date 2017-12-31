@@ -6,7 +6,7 @@
 class Ota
 {
   public:
-    static void setup();
+    static void begin();
     static void loop();
   private:
     Ota();

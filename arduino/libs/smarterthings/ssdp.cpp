@@ -1,9 +1,6 @@
-#include <ssdp.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266SSDP.h>
+#include "ssdp.h"
 
-Ssdp::Ssdp(ESP8266WebServer *httpInstance) {
+Ssdp::Ssdp(ESP8266WebServer *httpInstance, const char* name, const char* modelName, const char* modelNumber) {
   http = httpInstance;
 
   Serial.println("Starting SSDP Service");
@@ -16,8 +13,8 @@ Ssdp::Ssdp(ESP8266WebServer *httpInstance) {
   SSDP.setHTTPPort(80);
   SSDP.setSerialNumber(ESP.getChipId());
   SSDP.setDeviceType("urn:schemas-upnp-org:device:SmarterThings:1");
-  SSDP.setName(NAME);
-  SSDP.setModelName(MODEL_NAME);
-  SSDP.setModelNumber(MODEL_NUMBER);
+  SSDP.setName(name);
+  SSDP.setModelName(modelName);
+  SSDP.setModelNumber(modelNumber);
   SSDP.begin();
 }

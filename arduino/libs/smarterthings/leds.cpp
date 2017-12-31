@@ -1,7 +1,6 @@
 #include "leds.h"
 #define TEMPERATURE Tungsten40W
 #define CORRECTION Typical8mmPixel
-// Dim a color by 25% (64/256ths)
 #define FADE_PERCENTAGE 256
 
 Leds::Leds(int number) {
