@@ -1,0 +1,39 @@
+{
+  "name": "MifloraServer",
+  "version": "",
+  "dependencies": {
+    "@achingbrain/ssdp": "^2.1.2",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "ip": "^1.1.5",
+    "lowdb": "^1.0.0",
+    "macaddress": "^0.2.8",
+    "noble": "git+https://github.com/PolideaInternal/noble.git#macos_highsierra"
+  },
+  "scripts": {
+    "prestart": "npm run build",
+    "start": "node dist/index.js",
+    "watch": "nodemon --exec npm start",
+    "lint": "eslint src",
+    "prebuild": "npm run clean",
+    "build": "babel src --out-dir dist",
+    "clean": "rm -R dist/*"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.13.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "nodemon": "^1.14.1"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "dist/*",
+      "node_modules/*"
+    ],
+    "delay": "5000"
+  }
+}
