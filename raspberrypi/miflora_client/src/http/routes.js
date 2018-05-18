@@ -23,6 +23,7 @@ export const config = (http) => {
     }
     db.set('callbackUrl', callbackUrl)
       .write();
+    console.log(`Set callback url to ${callbackUrl}`);
     return res.sendStatus(200);
   });
 };

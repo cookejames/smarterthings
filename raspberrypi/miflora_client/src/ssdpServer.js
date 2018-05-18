@@ -1,12 +1,13 @@
 import Ssdp from '@achingbrain/ssdp';
 import macaddress from 'macaddress';
 import { promisify } from 'util';
+import HTTP from './http';
 
 const macaddressOne = promisify(macaddress.one);
 
 export default class SSDPServer {
   static get USN() {
-    return 'urn:schemas-upnp-org:device:SmarterThings:1';
+    return 'urn:schemas-upnp-org:device:SmarterMiFlora:1';
   }
 
   constructor() {
@@ -20,12 +21,18 @@ export default class SSDPServer {
    */
   async start(url) {
     const mac = await macaddressOne();
+    const uri = `http://${HTTP.ADDRESS}:${HTTP.PORT}`;
     this.advertisement = await this.server.advertise({
       usn: SSDPServer.USN,
       location: {
         udp4: url,
       },
       details: {
+        URLBase: uri,
+        urls: {
+          config: `${uri}/config`,
+          status: `${uri}/status`,
+        },
         device: {
           deviceType: SSDPServer.USN,
           friendlyName: 'Smarter Things MiFlora Server',

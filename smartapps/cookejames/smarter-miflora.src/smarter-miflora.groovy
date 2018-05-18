@@ -13,18 +13,18 @@
  *  Led Linker
  *
  *  Author: James Cooke based on work by Eric Maycock (erocm123)
- *  Date: 2017-11-06
+ *  Date: 2018-01-06
  */
 
 definition(
-    name: "Smarter Things",
+    name: "Smarter MiFlora",
     namespace: "cookejames",
     author: "James Cooke - based on work by Eric Maycock (erocm123)",
-    description: "Connection application for WS2812b strips",
+    description: "Connection application for MiFlora",
     category: "Convenience",
-    iconUrl:   "http://cdn.device-icons.smartthings.com/Home/home1-icn.png",
-    iconX2Url: "http://cdn.device-icons.smartthings.com/Home/home1-icn@2x.png",
-    iconX3Url: "http://cdn.device-icons.smartthings.com/Home/home1-icn@3x.png"
+    iconUrl:   "http://cdn.device-icons.smartthings.com/Home/home13-icn.png",
+    iconX2Url: "http://cdn.device-icons.smartthings.com/Home/home13-icn@2x.png",
+    iconX3Url: "http://cdn.device-icons.smartthings.com/Home/home13-icn@3x.png"
 )
 
 preferences {
@@ -204,7 +204,7 @@ def getVerifiedDevices() {
 }
 
 private discoverDevices() {
-	sendHubCommand(new physicalgraph.device.HubAction("lan discovery urn:schemas-upnp-org:device:SmarterThings:1", physicalgraph.device.Protocol.LAN))
+	sendHubCommand(new physicalgraph.device.HubAction("lan discovery urn:schemas-upnp-org:device:SmarterMiFlora:1", physicalgraph.device.Protocol.LAN))
 }
 
 def configured() {
@@ -247,55 +247,69 @@ def installed() {
 
 def updated() {
 	unsubscribe()
-    unschedule()
+  unschedule()
 	initialize()
 }
 
 def initialize() {
     ssdpSubscribe()
-    runEvery5Minutes("ssdpDiscover")
+    runEvery1Minute("ssdpDiscover")
 }
 
 void ssdpSubscribe() {
-    subscribe(location, "ssdpTerm.urn:schemas-upnp-org:device:SmarterThings:1", ssdpHandler)
+    subscribe(location, "ssdpTerm.urn:schemas-upnp-org:device:SmarterMiFlora:1", ssdpHandler)
 }
 
 void ssdpDiscover() {
-    sendHubCommand(new physicalgraph.device.HubAction("lan discovery urn:schemas-upnp-org:device:SmarterThings:1", physicalgraph.device.Protocol.LAN))
+    sendHubCommand(new physicalgraph.device.HubAction("lan discovery urn:schemas-upnp-org:device:SmarterMiFlora:1", physicalgraph.device.Protocol.LAN))
 }
 
 def ssdpHandler(evt) {
     def description = evt.description
     def hub = evt?.hubId
     def parsedEvent = parseLanMessage(description)
+    log.debug "Parsed SSDP event"
     parsedEvent << ["hub":hub]
+    parsedEvent.configured = false
+    log.debug parsedEvent
 
     def devices = getDevices()
 
-    String ssdpUSN = parsedEvent.ssdpUSN.toString()
+    String mac = parsedEvent.mac
 
-    if (devices."${ssdpUSN}") {
-        def d = devices."${ssdpUSN}"
-        def child = getChildDevice(parsedEvent.mac)
-        def childIP
-        def childPort
-        if (child) {
-            childIP = child.getDeviceDataByName("ip")
-            childPort = child.getDeviceDataByName("port").toString()
-            log.debug "Device data: ($childIP:$childPort) - reporting data: (${convertHexToIP(parsedEvent.networkAddress)}:${convertHexToInt(parsedEvent.deviceAddress)})."
-            if(childIP != convertHexToIP(parsedEvent.networkAddress) || childPort != convertHexToInt(parsedEvent.deviceAddress).toString()){
-               log.debug "Device data (${child.getDeviceDataByName("ip")}) does not match what it is reporting(${convertHexToIP(parsedEvent.networkAddress)}). Attempting to update."
-               child.sync(convertHexToIP(parsedEvent.networkAddress), convertHexToInt(parsedEvent.deviceAddress).toString())
-            }
+    if (devices."${mac}") {
+        def device = devices."${mac}"
+        if (device.networkAddress != parsedEvent.networkAddress || device.deviceAddress != parsedEvent.deviceAddress) {
+          log.debug "Device IP or port has been updated"
+          device.networkAddress = parsedEvent.networkAddress
+          device.deviceAddress = parsedEvent.deviceAddress
         }
-
-        if (d.networkAddress != parsedEvent.networkAddress || d.deviceAddress != parsedEvent.deviceAddress) {
-            d.networkAddress = parsedEvent.networkAddress
-            d.deviceAddress = parsedEvent.deviceAddress
+        if (device.ssdpUSN != parsedEvent.ssdpUSN) {
+          log.debug "Device USN has changed. Configuring."
+          device.ssdpUSN = parsedEvent.ssdpUSN
+          configureDevice(parsedEvent)
+        }
+        if (!device.configured) {
+          log.debug "Device not yet configured. Configuring now."
+          configureDevice(parsedEvent)
         }
     } else {
-        devices << ["${ssdpUSN}": parsedEvent]
+      log.debug "New device detected"
+      devices << ["${mac}": parsedEvent]
+      configureDevice(parsedEvent)
     }
+}
+
+void configureDevice(device) {
+  def ip = convertHexToIP(device.networkAddress)
+  def port = convertHexToInt(device.deviceAddress)
+  def host = "${ip}:${port}"
+  def params = [
+    method: "GET",
+    path: device.ssdpPath,
+    headers: [HOST: host]
+  ]
+  sendHubCommand(new physicalgraph.device.HubAction(params, host, [callback: configureDeviceHandler]))
 }
 
 void verifyDevices() {
@@ -312,19 +326,16 @@ def getDevices() {
     state.devices = state.devices ?: [:]
 }
 
-void deviceDescriptionHandler(physicalgraph.device.HubResponse hubResponse) {
-	log.trace "description.xml response (application/xml)"
+void configureDeviceHandler(physicalgraph.device.HubResponse hubResponse) {
+
 	def body = hubResponse.xml
-    log.debug body?.device?.friendlyName?.text()
-	if (body?.device?.modelName?.text().startsWith("SmarterThings")) {
+  log.trace "description.xml response (application/xml) ${body?.device?.friendlyName?.text()}"
+	if (body?.device?.modelName?.text().startsWith("SmarterThingsMiFlora")) {
 		def devices = getDevices()
-		def device = devices.find {it?.key?.contains(body?.device?.UDN?.text())}
-		if (device) {
-			device.value << [name:body?.device?.friendlyName?.text() + " (" + convertHexToIP(hubResponse.ip) + ")", serialNumber:body?.device?.serialNumber?.text(), verified: true]
-		} else {
-			log.error "/description.xml returned a device that didn't exist"
-		}
-	}
+		log.debug "Should send configure now!"
+	} else {
+    log.error "Invalid device responded to SSDP"
+  }
 }
 
 def addDevices() {

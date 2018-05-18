@@ -1,15 +1,21 @@
+import ip from 'ip';
 import express from 'express';
 import bodyParser from 'body-parser';
 
 const LISTEN_PORT = 8080;
 
 export default class HTTPServer {
-  static get LISTEN_PORT() {
+  static get PORT() {
     return 8080;
   }
+
+  static get ADDRESS() {
+    return ip.address();
+  }
+
   constructor() {
     this.server = express();
-    this.server.use(bodyParser.json())
+    this.server.use(bodyParser.json());
   }
 
   start() {
